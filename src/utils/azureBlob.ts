@@ -18,6 +18,15 @@ export const downloadBlob = async (blobName) => {
 
 export const removeBlob = (blobPath) => fs.unlink(blobPath);
 
+export const removeBlobs = async (blobFilePath) => {
+  const files = await fs.readdir(blobFilePath);
+  for (const file of files) {
+    if (file === ".gitkeep") continue;
+    await removeBlob(`${blobFilePath}${file}`);
+    console.log(`🗑️ Removed ${file}`);
+  }
+};
+
 export const uploadBlobs = async (blobFilePath, blobDirID) => {
   const uploadBlob = async (blobName) => {
     const blockBlobClient = containerClient.getBlockBlobClient(

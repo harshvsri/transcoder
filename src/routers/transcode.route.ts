@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { uploadBlobs, downloadBlob, removeBlob } from "../utils/azureBlob";
+import {
+  uploadBlobs,
+  downloadBlob,
+  removeBlob,
+  removeBlobs,
+} from "../utils/azureBlob";
 import { exec } from "child_process";
 import { getFfmpegCmd } from "../utils/ffmpeg";
 import path from "path";
-import fs from "fs/promises";
 
 const transcodeRouter = Router();
 
@@ -35,12 +39,7 @@ transcodeRouter.get("/:blobName", async (req, res) => {
     const videoURL = `${process.env.CONTAINER_CLIENT_URL}/${blobDirID}/index.m3u8`;
     res.status(200).json({ message: "Video processed successfully", videoURL });
 
-    const files = await fs.readdir(blobFilePath);
-    for (const file of files) {
-      if (file === ".gitkeep") continue;
-      await removeBlob(`${blobFilePath}${file}`);
-      console.log(`🗑️ Removed ${file}`);
-    }
+    await removeBlobs(blobFilePath);
   });
 });
 
