@@ -22,7 +22,7 @@ transcodeRouter.get("/:blobName", async (req, res) => {
       console.error(stderr);
 
       await removeBlob(blobPath);
-      return res.status(500).json({ error: "Failed to process video" });
+      return res.status(500).json({ message: "Failed to process video" });
     }
 
     console.log(stdout);
@@ -32,7 +32,8 @@ transcodeRouter.get("/:blobName", async (req, res) => {
     const blobFilePath = "./uploads/";
     await uploadBlobs(blobFilePath, blobDirID);
 
-    res.status(200).json({ message: "Video processed successfully" });
+    const videoURL = `${process.env.CONTAINER_CLIENT_URL}/${blobDirID}/index.m3u8`;
+    res.status(200).json({ message: "Video processed successfully", videoURL });
 
     const files = await fs.readdir(blobFilePath);
     for (const file of files) {
