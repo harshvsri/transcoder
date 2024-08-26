@@ -12,7 +12,7 @@ RUN npm ci
 
 COPY --chown=node . .
 
-RUN node -v && npm -v && ffmpeg -h
+RUN npm run build
 
-CMD [ "npm", "run", "dev" ]
+CMD [ "npm", "start" ]
 
