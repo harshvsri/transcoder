@@ -18,36 +18,37 @@ transcodeRouter.get("/:blobName", async (req, res) => {
   const blobDirID = path.parse(blobName).name;
 
   try {
+    console.log(`Downloading ${blobName}...`);
     const blobPath = await downloadBlob(blobName);
     const outputPath = `./uploads`;
 
-    console.log(`🔥 Transcoding started...`);
+    console.log(`Transcoding started...`);
     const { stdout, stderr } = await execAsync(
       getFfmpegCmd(blobPath, outputPath)
     );
-    // Remove the downloaded blob
-    await removeBlob(blobPath);
+
     if (stderr) {
-      console.error(`Ffmpeg stderr: ${stderr}`);
+      console.info(`Ffmpeg stderr: ${stderr}`);
       if (stderr.includes("error")) {
         throw new Error("Transcoding error occurred");
       }
     }
 
-    console.log("⬆️ Uploading transcoded blobs...");
+    console.log("Uploading transcoded blobs...");
     const blobFilePath = "./uploads/";
     await uploadBlobs(blobFilePath, blobDirID);
 
     const videoURL = `${process.env.CONTAINER_CLIENT_URL}/${blobDirID}/index.m3u8`;
     res.status(200).json({ message: "Video processed successfully", videoURL });
-    await removeBlobs(blobFilePath);
   } catch (error) {
+    // If any error happens, log the error and return a 500 status code
     console.error(error);
-
-    // Clean up the transcoded blobs if an error occurs
+    return res.status(500).json({ message: "Failed to process video", error });
+  } finally {
+    // CleanUp: Remove the downloaded blob and transcoded blobs
+    await removeBlob(`./downloads/${blobName}`);
     const blobFilePath = "./uploads/";
     await removeBlobs(blobFilePath);
-    return res.status(500).json({ message: "Failed to process video", error });
   }
 });
 

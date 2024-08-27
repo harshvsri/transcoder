@@ -5,7 +5,7 @@ import cors from "cors";
 import transcodeRouter from "./routers/transcode.route";
 import indexRouter from "./routers/index.route";
 import { error404Handler, errorHandler } from "./utils/error";
-const PORT = 3001;
+const PORT = process.env.PORT || 8080;
 
 const app = express();
 app.use(cors());
@@ -15,7 +15,9 @@ app.use("/", indexRouter);
 app.use("/transcode", transcodeRouter);
 
 app.listen(PORT, () => {
-  console.log(`Server is listening at http://localhost:${PORT}`);
+  console.log(
+    `Server is listening at http://localhost:${PORT} (internal Docker port)`
+  );
 });
 
 app.use(error404Handler);
